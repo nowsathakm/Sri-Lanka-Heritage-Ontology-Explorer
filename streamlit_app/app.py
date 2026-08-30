@@ -154,6 +154,18 @@ explanation, no comments before or after.
 
 {SCHEMA_NOTE}
 
+Every site in this ontology is already located in Sri Lanka — do not add a country filter (e.g. via \
+locatedInCountry) unless the question specifically asks about country/nationality; it only adds a chance \
+to get the join wrong for no benefit.
+
+hasActivity must point to the ACTIVITY INDIVIDUAL (e.g. :HikingActivity, :SurfingActivity), never the bare \
+class name (:Hiking, :Surfing) — a triple like "?site :hasActivity :Hiking" will never match anything, \
+because Hiking is a class, not an individual. Example — correct pattern for "which sites offer hiking?":
+SELECT ?siteLabel WHERE {{
+    ?site :hasActivity :HikingActivity .
+    ?site rdfs:label ?siteLabel .
+}}
+
 Always bind rdfs:label into a variable for any entity you want to display by name, since raw URIs are \
 not human-friendly. The graph you will query already includes reasoner-materialised inferred triples \
 (e.g. rdf:type :UNESCOWorldHeritageSite, and :locatedInCountry), so you may query those directly as if \
@@ -221,17 +233,13 @@ def nl_to_sparql(question):
     resp = client.messages.create(
         model=model_id,
         max_tokens=1000,
+        temperature=0,
         system=SYSTEM_PROMPT,
         messages=[{"role": "user", "content": question}],
     )
     text = "".join(block.text for block in resp.content if block.type == "text").strip()
     text = re.sub(r"^```(sparql)?", "", text.strip(), flags=re.IGNORECASE).strip()
     text = re.sub(r"```$", "", text).strip()
-
-    # Claude sometimes omits (or mis-declares) PREFIX lines even when asked for
-    # them. rdflib requires every prefix used in the query to be explicitly
-    # declared in the query text itself, so strip whatever Claude produced and
-    # force-prepend our own known-good set every time, for reliability.
     text = re.sub(r"(?im)^\s*PREFIX\s+\S*:\s*<[^>]*>\s*$", "", text).strip()
     text = PREFIXES.strip() + "\n" + text
     return text
