@@ -233,13 +233,17 @@ def nl_to_sparql(question):
     resp = client.messages.create(
         model=model_id,
         max_tokens=1000,
-        temperature=0,
         system=SYSTEM_PROMPT,
         messages=[{"role": "user", "content": question}],
     )
     text = "".join(block.text for block in resp.content if block.type == "text").strip()
     text = re.sub(r"^```(sparql)?", "", text.strip(), flags=re.IGNORECASE).strip()
     text = re.sub(r"```$", "", text).strip()
+
+    # Claude sometimes omits (or mis-declares) PREFIX lines even when asked for
+    # them. rdflib requires every prefix used in the query to be explicitly
+    # declared in the query text itself, so strip whatever Claude produced and
+    # force-prepend our own known-good set every time, for reliability.
     text = re.sub(r"(?im)^\s*PREFIX\s+\S*:\s*<[^>]*>\s*$", "", text).strip()
     text = PREFIXES.strip() + "\n" + text
     return text
