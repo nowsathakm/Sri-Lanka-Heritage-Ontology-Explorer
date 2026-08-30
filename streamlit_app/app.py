@@ -227,6 +227,8 @@ def nl_to_sparql(question):
     text = "".join(block.text for block in resp.content if block.type == "text").strip()
     text = re.sub(r"^```(sparql)?", "", text.strip(), flags=re.IGNORECASE).strip()
     text = re.sub(r"```$", "", text).strip()
+    text = re.sub(r"(?im)^\s*PREFIX\s+\S*:\s*<[^>]*>\s*$", "", text).strip()
+    text = PREFIXES.strip() + "\n" + text
     return text
 
 
