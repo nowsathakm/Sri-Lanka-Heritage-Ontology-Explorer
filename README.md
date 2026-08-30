@@ -106,15 +106,15 @@ Full query text, results, and interpretation for each are in `docs/Assignment_Re
 
 ```
  ┌────────────────────┐      ┌──────────────────┐      ┌─────────────────────┐
- │  Protégé + HermiT   │ ───▶ │  Materialised     │ ───▶ │  rdflib (SPARQL 1.1)│
- │  (offline reasoning)│      │  ontology (.ttl)  │      │  query engine        │
+ │  Protégé + HermiT  │ ───▶ │  Materialised    │ ───▶ │  rdflib (SPARQL 1.1)│
+ │ (offline reasoning)│      │  ontology (.ttl) │      │  query engine       │
  └────────────────────┘      └──────────────────┘      └──────────┬──────────┘
-                                                                    │
-                              ┌──────────────────┐                 ▼
-                              │  Anthropic API     │◀── question ──┤  Streamlit app
-                              │  (server-side only)│──── SPARQL ──▶│  (app.py)
-                              └──────────────────┘                 │
-                                                                    ▼
+                                                                  │
+                              ┌──────────────────┐                ▼
+                              │  Anthropic API   │ ◀── question ──┤  Streamlit app
+                              │(server-side only)│ ──── SPARQL ──▶│  (app.py)
+                              └──────────────────┘                │
+                                                                  ▼
                                                             results + asserted/
                                                             inferred labelling
 ```

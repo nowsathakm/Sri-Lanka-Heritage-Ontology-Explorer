@@ -2,31 +2,48 @@
 Sri Lanka Heritage & Tourism Ontology Explorer — Streamlit edition.
 
 Runs a real SPARQL 1.1 engine (rdflib) against the ontology (asserted +
-HermiT-materialised inferred triples). The Anthropic API key lives only in
-Streamlit secrets / environment variables on the server — it is never sent
-to, or visible in, the browser.
+HermiT-materialised inferred triples). Authenticates the NL-search feature
+via EITHER a direct Anthropic API key OR AWS Bedrock credentials — whichever
+is configured. Credentials live only in Streamlit secrets / environment
+variables on the server; they are never sent to, or visible in, the browser.
 
-Run locally:
+Run locally (direct Anthropic API key):
     pip install -r requirements.txt
     export ANTHROPIC_API_KEY=sk-ant-...      (or use .streamlit/secrets.toml)
+    streamlit run app.py
+
+Run locally (AWS Bedrock instead):
+    pip install -r requirements.txt
+    export AWS_ACCESS_KEY_ID=...
+    export AWS_SECRET_ACCESS_KEY=...
+    export AWS_REGION=us-east-1                        (region where Claude is enabled in Bedrock)
+    export BEDROCK_MODEL_ID=us.anthropic.claude-sonnet-4-6-v1:0   (check exact ID in your Bedrock console)
     streamlit run app.py
 
 Deploy for free on Streamlit Community Cloud:
     1. Push this folder to a GitHub repo (app.py, requirements.txt, ontology_materialized.ttl).
     2. Go to https://share.streamlit.io , sign in, "New app", pick the repo/branch, main file = app.py.
-    3. In the app's Settings -> Secrets, add:  ANTHROPIC_API_KEY = "sk-ant-..."
-    4. Deploy. The API key is stored encrypted server-side and is never exposed to visitors.
+    3. In the app's Settings -> Secrets, add EITHER:
+           ANTHROPIC_API_KEY = "sk-ant-..."
+       OR:
+           AWS_ACCESS_KEY_ID = "..."
+           AWS_SECRET_ACCESS_KEY = "..."
+           AWS_REGION = "us-east-1"
+           BEDROCK_MODEL_ID = "us.anthropic.claude-sonnet-4-6-v1:0"
+    4. Deploy. Credentials are stored encrypted server-side and are never exposed to visitors.
 """
 
 import os
 import re
 import streamlit as st
 from rdflib import Graph
-import anthropic
+from anthropic import Anthropic, AnthropicBedrock
 
 st.set_page_config(page_title="Sri Lanka Heritage Ontology Explorer", page_icon="🛕", layout="wide")
 
 ONTOLOGY_PATH = os.path.join(os.path.dirname(__file__), "ontology_materialized.ttl")
+DEFAULT_DIRECT_MODEL = "claude-sonnet-4-6"
+DEFAULT_BEDROCK_MODEL = "us.anthropic.claude-sonnet-4-6-v1:0"
 
 PREFIXES = """
 PREFIX : <http://www.srilanka-heritage.org/ontology#>
@@ -162,22 +179,47 @@ def run_sparql(query_text):
     return cols, rows
 
 
+def _secret_or_env(key, default=None):
+    try:
+        val = st.secrets.get(key, None)
+    except Exception:
+        val = None
+    return val or os.environ.get(key, default)
+
+
 def get_client():
-    api_key = st.secrets.get("ANTHROPIC_API_KEY", os.environ.get("ANTHROPIC_API_KEY"))
-    if not api_key:
-        return None
-    return anthropic.Anthropic(api_key=api_key)
+    """Returns (provider, client, model_id) using whichever credentials are configured.
+    Prefers a direct Anthropic API key; falls back to AWS Bedrock credentials."""
+    api_key = _secret_or_env("ANTHROPIC_API_KEY")
+    if api_key:
+        model_id = _secret_or_env("ANTHROPIC_MODEL", DEFAULT_DIRECT_MODEL)
+        return "direct", Anthropic(api_key=api_key), model_id
+
+    aws_access_key = _secret_or_env("AWS_ACCESS_KEY_ID")
+    aws_secret_key = _secret_or_env("AWS_SECRET_ACCESS_KEY")
+    if aws_access_key and aws_secret_key:
+        aws_region = _secret_or_env("AWS_REGION", "us-east-1")
+        model_id = _secret_or_env("BEDROCK_MODEL_ID", DEFAULT_BEDROCK_MODEL)
+        client = AnthropicBedrock(
+            aws_access_key=aws_access_key,
+            aws_secret_key=aws_secret_key,
+            aws_region=aws_region,
+        )
+        return "bedrock", client, model_id
+
+    return None, None, None
 
 
 def nl_to_sparql(question):
-    client = get_client()
+    provider, client, model_id = get_client()
     if client is None:
         raise RuntimeError(
-            "No ANTHROPIC_API_KEY configured on the server. "
-            "Add it to .streamlit/secrets.toml locally, or Settings -> Secrets on Streamlit Cloud."
+            "No credentials configured on the server. Set either ANTHROPIC_API_KEY, "
+            "or AWS_ACCESS_KEY_ID + AWS_SECRET_ACCESS_KEY (for AWS Bedrock), via "
+            ".streamlit/secrets.toml locally or Settings -> Secrets on Streamlit Cloud."
         )
     resp = client.messages.create(
-        model="claude-sonnet-4-6",
+        model=model_id,
         max_tokens=1000,
         system=SYSTEM_PROMPT,
         messages=[{"role": "user", "content": question}],
