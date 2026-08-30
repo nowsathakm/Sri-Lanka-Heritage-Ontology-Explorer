@@ -44,10 +44,12 @@ Beyond basic class modelling, the ontology is built to support genuine reasoner-
 ```
 sri-lanka-heritage-ontology-explorer/
 ├── README.md                          # you are here
+├── LICENSE                            # MIT license
 ├── ontology/
-│   ├── SriLankaHeritage.owl           # RDF/XML — open directly in Protégé
-│   ├── SriLankaHeritage.ttl           # Turtle — same content, human-readable
-│   └── ontology_diagram.png           # class hierarchy & key properties diagram
+│   ├── SriLankaHeritage.owl                    # RDF/XML — open directly in Protégé
+│   ├── SriLankaHeritage.ttl                    # Turtle — same content, human-readable
+│   ├── ontology_diagram_1_hierarchy.png        # class hierarchy diagram
+│   └── ontology_diagram_2_properties.png       # properties & reasoner-inferred classes diagram
 └── streamlit_app/
     ├── app.py                         # Streamlit front-end (NL search + presets)
     ├── requirements.txt
@@ -81,11 +83,9 @@ sri-lanka-heritage-ontology-explorer/
 ```bash
 cd streamlit_app
 pip install -r requirements.txt
-export ANTHROPIC_API_KEY=sk-ant-...     # needed only for the natural-language search box
 streamlit run app.py
 ```
-
-See `streamlit_app/README.md` for free cloud deployment instructions (Streamlit Community Cloud) so the app can be shared as a link with no installation required on the viewer's end.
+Full setup (credentials — direct Anthropic API key or AWS Bedrock, either works), connection testing, and free cloud deployment instructions are all in streamlit_app/README.md — that's the source of truth for this app.
 
 ## SPARQL Queries
 
@@ -119,7 +119,7 @@ Full query text, results, and interpretation for each are in `docs/Assignment_Re
                                                             inferred labelling
 ```
 
-Reasoning happens **offline** in Protégé/HermiT; the inferred triples are materialised into the shipped `.ttl` file so the deployed app can use a real, lightweight, standards-compliant SPARQL engine without bundling a Java reasoner.
+Reasoning happens offline in Protégé/HermiT; the inferred triples are materialised into the shipped .ttl file so the deployed app can use a real, lightweight, standards-compliant SPARQL engine without bundling a Java reasoner. The natural-language search step authenticates via either a direct Anthropic API key or AWS Bedrock credentials, whichever is configured — the app detects which is available and switches automatically, with credentials never exposed to the browser.
 
 ## Tech Stack
 

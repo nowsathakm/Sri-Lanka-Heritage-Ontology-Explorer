@@ -227,6 +227,11 @@ def nl_to_sparql(question):
     text = "".join(block.text for block in resp.content if block.type == "text").strip()
     text = re.sub(r"^```(sparql)?", "", text.strip(), flags=re.IGNORECASE).strip()
     text = re.sub(r"```$", "", text).strip()
+
+    # Claude sometimes omits (or mis-declares) PREFIX lines even when asked for
+    # them. rdflib requires every prefix used in the query to be explicitly
+    # declared in the query text itself, so strip whatever Claude produced and
+    # force-prepend our own known-good set every time, for reliability.
     text = re.sub(r"(?im)^\s*PREFIX\s+\S*:\s*<[^>]*>\s*$", "", text).strip()
     text = PREFIXES.strip() + "\n" + text
     return text
@@ -236,9 +241,34 @@ def nl_to_sparql(question):
 
 st.markdown(
     """
-    <div style="text-align:center; padding: 0.5rem 0 1rem 0;">
-        <h1 style="margin:0.2rem 0;">🛕 Sri Lanka Heritage &amp; Tourism Ontology Explorer</h1>
-        <p style="color:#666; max-width:700px; margin:0.4rem auto 0 auto;">
+    <style>
+    .stButton>button {
+        border: 1px solid #B8860B;
+        border-radius: 8px;
+        color: #16232A;
+        font-weight: 600;
+        transition: all 0.15s ease;
+    }
+    .stButton>button:hover {
+        background-color: #B8860B;
+        color: #F6F0E4;
+        border-color: #B8860B;
+    }
+    [data-testid="stExpander"] summary {
+        background-color: #EDE4D0;
+        border-radius: 8px;
+        font-weight: 600;
+        color: #16232A;
+    }
+    div[data-testid="stCodeBlock"] pre {
+        border: 1px solid #B8860B55;
+    }
+    </style>
+    <div style="text-align:center; padding: 1.2rem 1rem; margin-bottom: 1rem;
+                background: linear-gradient(135deg, #16232A 0%, #20323C 100%);
+                border-radius: 12px; border: 1px solid #B8860B;">
+        <h1 style="margin:0.1rem 0; color:#F6F0E4;">🛕 Sri Lanka Heritage &amp; Tourism Ontology Explorer</h1>
+        <p style="color:#D9A93B; max-width:700px; margin:0.5rem auto 0 auto; font-size:0.95rem;">
             Ask a question in plain English, or pick one of the eight tested competency questions.
             Every answer is retrieved by executing a real SPARQL query (via rdflib) against the ontology.
         </p>
