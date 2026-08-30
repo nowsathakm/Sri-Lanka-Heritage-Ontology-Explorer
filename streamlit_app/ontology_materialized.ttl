@@ -1,0 +1,751 @@
+@prefix ns1: <http://www.srilanka-heritage.org/ontology#> .
+@prefix owl: <http://www.w3.org/2002/07/owl#> .
+@prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
+
+<http://anonymous> a owl:Ontology .
+
+<http://www.srilanka-heritage.org/ontology> a owl:Ontology ;
+    rdfs:label "Sri Lanka Heritage and Tourism Sites Ontology"^^xsd:string ;
+    rdfs:comment "An ontology describing Sri Lanka's heritage and tourism sites: their type, geographic location, activities offered, UNESCO status, and entry fees. Developed as coursework for Semantic Web and Ontologies."^^xsd:string .
+
+ns1:hasElevationMeters a owl:DatatypeProperty,
+        owl:FunctionalProperty ;
+    rdfs:label "has elevation (m)"^^xsd:string ;
+    rdfs:comment "Elevation of the site above sea level, in metres."^^xsd:string ;
+    rdfs:domain ns1:TouristSite ;
+    rdfs:range xsd:decimal .
+
+ns1:locatedInCountry a owl:ObjectProperty ;
+    rdfs:label "located in country"^^xsd:string ;
+    rdfs:comment "Derived property: a tourist site's country, inferred via the property chain locatedIn o partOfRegion. Never asserted directly on an individual."^^xsd:string ;
+    rdfs:domain ns1:TouristSite ;
+    rdfs:range ns1:Country ;
+    owl:propertyChainAxiom ( ns1:locatedIn ns1:partOfRegion ) .
+
+ns1:nearbyTo a owl:ObjectProperty,
+        owl:SymmetricProperty ;
+    rdfs:label "nearby to"^^xsd:string ;
+    rdfs:comment "Relates two tourist sites that are geographically close enough to visit on the same trip. Symmetric: if A is nearby B, then B is nearby A."^^xsd:string ;
+    rdfs:domain ns1:TouristSite ;
+    rdfs:range ns1:TouristSite .
+
+ns1:siteDescription a owl:DatatypeProperty,
+        owl:FunctionalProperty ;
+    rdfs:label "site description"^^xsd:string ;
+    rdfs:comment "A short human-readable description of the site."^^xsd:string ;
+    rdfs:domain ns1:TouristSite ;
+    rdfs:range xsd:string .
+
+ns1:yearInscribed a owl:DatatypeProperty,
+        owl:FunctionalProperty ;
+    rdfs:label "year inscribed"^^xsd:string ;
+    rdfs:comment "Year the site was established, built, or UNESCO-inscribed."^^xsd:string ;
+    rdfs:domain ns1:TouristSite ;
+    rdfs:range xsd:int .
+
+ns1:EasternProvince a owl:Class ;
+    rdfs:label "Eastern Province"^^xsd:string ;
+    rdfs:subClassOf ns1:Province .
+
+ns1:NorthWesternProvince a owl:Class ;
+    rdfs:label "North Western Province"^^xsd:string ;
+    rdfs:subClassOf ns1:Province .
+
+ns1:NorthernProv a ns1:NorthernProvince,
+        owl:NamedIndividual ;
+    rdfs:label "Northern Province"^^xsd:string ;
+    ns1:isLocationOf ns1:NallurKovil ;
+    ns1:partOfRegion ns1:SriLanka .
+
+ns1:SabaragamuwaProv a ns1:SabaragamuwaProvince,
+        owl:NamedIndividual ;
+    rdfs:label "Sabaragamuwa Province"^^xsd:string ;
+    ns1:isLocationOf ns1:AdamsPeak ;
+    ns1:partOfRegion ns1:SriLanka .
+
+ns1:hasEntryFeeUSD a owl:DatatypeProperty,
+        owl:FunctionalProperty ;
+    rdfs:label "has entry fee (USD)"^^xsd:string ;
+    rdfs:comment "Foreign-visitor entry fee in US dollars. 0.0 means free entry."^^xsd:string ;
+    rdfs:domain ns1:TouristSite ;
+    rdfs:range xsd:decimal .
+
+ns1:isActivityOf a owl:ObjectProperty ;
+    rdfs:label "is activity of"^^xsd:string ;
+    rdfs:comment "Inverse of hasActivity."^^xsd:string ;
+    rdfs:domain ns1:Activity ;
+    rdfs:range ns1:TouristSite .
+
+ns1:isLocationOf a owl:ObjectProperty ;
+    rdfs:label "is location of"^^xsd:string ;
+    rdfs:comment "Inverse of locatedIn."^^xsd:string ;
+    rdfs:domain ns1:Province ;
+    rdfs:range ns1:TouristSite .
+
+ns1:isUNESCOListed a owl:DatatypeProperty,
+        owl:FunctionalProperty ;
+    rdfs:label "is UNESCO listed"^^xsd:string ;
+    rdfs:comment "True if the site is a UNESCO World Heritage Site."^^xsd:string ;
+    rdfs:domain ns1:TouristSite ;
+    rdfs:range xsd:boolean .
+
+ns1:partOfRegion a owl:ObjectProperty,
+        owl:TransitiveProperty ;
+    rdfs:label "part of region"^^xsd:string ;
+    rdfs:comment "Relates a geographic region to the larger region that contains it (e.g. a Province is part of the Country). Transitive, so containment chains correctly."^^xsd:string ;
+    rdfs:domain ns1:GeographicRegion ;
+    rdfs:range ns1:GeographicRegion .
+
+ns1:BotanicalGarden a owl:Class ;
+    rdfs:label "Botanical Garden"^^xsd:string ;
+    rdfs:comment "A curated garden of plant collections open to the public."^^xsd:string ;
+    rdfs:subClassOf ns1:CulturalSite .
+
+ns1:BuddhistTemple a owl:Class ;
+    rdfs:label "Buddhist Temple"^^xsd:string ;
+    rdfs:comment "A religious site used for Buddhist worship."^^xsd:string ;
+    rdfs:subClassOf ns1:ReligiousSite .
+
+ns1:CaveTempleSite a owl:Class ;
+    rdfs:label "Cave Temple"^^xsd:string ;
+    rdfs:comment "A temple built within a natural cave."^^xsd:string ;
+    rdfs:subClassOf ns1:ArchaeologicalSite .
+
+ns1:CentralProvince a owl:Class ;
+    rdfs:label "Central Province"^^xsd:string ;
+    rdfs:subClassOf ns1:Province .
+
+ns1:ChristianChurch a owl:Class ;
+    rdfs:label "Christian Church"^^xsd:string ;
+    rdfs:comment "A religious site used for Christian worship."^^xsd:string ;
+    rdfs:subClassOf ns1:ReligiousSite .
+
+ns1:ColomboNationalMuseum a ns1:Museum,
+        owl:NamedIndividual ;
+    rdfs:label "Colombo National Museum"^^xsd:string ;
+    ns1:hasActivity ns1:SightseeingActivity ;
+    ns1:hasEntryFeeUSD 5.0 ;
+    ns1:isUNESCOListed false ;
+    ns1:locatedIn ns1:WesternProv ;
+    ns1:locatedInCountry ns1:SriLanka ;
+    ns1:siteDescription "Sri Lanka's largest museum, housing royal and historical artefacts."^^xsd:string ;
+    ns1:yearInscribed "1877"^^xsd:int .
+
+ns1:Country a owl:Class ;
+    rdfs:label "Country"^^xsd:string ;
+    rdfs:comment "A sovereign country. Used here so that a site's country membership can be inferred through a property chain."^^xsd:string ;
+    rdfs:subClassOf ns1:GeographicRegion .
+
+ns1:FortSite a owl:Class ;
+    rdfs:label "Fort"^^xsd:string ;
+    rdfs:comment "A fortified historical structure or fortified town."^^xsd:string ;
+    rdfs:subClassOf ns1:ArchaeologicalSite .
+
+ns1:HinduKovil a owl:Class ;
+    rdfs:label "Hindu Kovil"^^xsd:string ;
+    rdfs:comment "A religious site used for Hindu worship."^^xsd:string ;
+    rdfs:subClassOf ns1:ReligiousSite .
+
+ns1:MosqueSite a owl:Class ;
+    rdfs:label "Mosque"^^xsd:string ;
+    rdfs:comment "A religious site used for Islamic worship."^^xsd:string ;
+    rdfs:subClassOf ns1:ReligiousSite .
+
+ns1:Museum a owl:Class ;
+    rdfs:label "Museum"^^xsd:string ;
+    rdfs:comment "A museum housing cultural or historical artefacts."^^xsd:string ;
+    rdfs:subClassOf ns1:CulturalSite .
+
+ns1:NallurKovil a ns1:FreeEntrySite,
+        ns1:HinduKovil,
+        ns1:ReligiousPilgrimageSite,
+        owl:NamedIndividual ;
+    rdfs:label "Nallur Kovil"^^xsd:string ;
+    ns1:hasActivity ns1:PilgrimageActivity ;
+    ns1:hasEntryFeeUSD 0.0 ;
+    ns1:isUNESCOListed false ;
+    ns1:locatedIn ns1:NorthernProv ;
+    ns1:locatedInCountry ns1:SriLanka ;
+    ns1:siteDescription "Prominent Hindu temple in Jaffna dedicated to Lord Murugan."^^xsd:string .
+
+ns1:NorthCentralProv a ns1:NorthCentralProvince,
+        owl:NamedIndividual ;
+    rdfs:label "North Central Province"^^xsd:string ;
+    ns1:isLocationOf ns1:AnuradhapuraAncientCity,
+        ns1:PolonnaruwaAncientCity ;
+    ns1:partOfRegion ns1:SriLanka .
+
+ns1:NorthCentralProvince a owl:Class ;
+    rdfs:label "North Central Province"^^xsd:string ;
+    rdfs:subClassOf ns1:Province .
+
+ns1:NorthernProvince a owl:Class ;
+    rdfs:label "Northern Province"^^xsd:string ;
+    rdfs:subClassOf ns1:Province .
+
+ns1:NuwaraEliyaTeaEstate a ns1:TeaPlantation,
+        owl:NamedIndividual ;
+    rdfs:label "Nuwara Eliya Tea Estate"^^xsd:string ;
+    ns1:hasActivity ns1:SightseeingActivity ;
+    ns1:hasElevationMeters 1868.0 ;
+    ns1:hasEntryFeeUSD 5.0 ;
+    ns1:isUNESCOListed false ;
+    ns1:locatedIn ns1:CentralProv ;
+    ns1:locatedInCountry ns1:SriLanka ;
+    ns1:siteDescription "Highland tea estate and factory in Sri Lanka's Ceylon tea country."^^xsd:string .
+
+ns1:Pilgrimage a owl:Class ;
+    rdfs:label "Pilgrimage"^^xsd:string ;
+    rdfs:subClassOf ns1:Activity .
+
+ns1:SabaragamuwaProvince a owl:Class ;
+    rdfs:label "Sabaragamuwa Province"^^xsd:string ;
+    rdfs:subClassOf ns1:Province .
+
+ns1:SafariActivity a ns1:WildlifeSafari,
+        owl:NamedIndividual ;
+    rdfs:label "Wildlife Safari"^^xsd:string ;
+    ns1:isActivityOf ns1:HortonPlainsNationalPark,
+        ns1:YalaNationalPark .
+
+ns1:SouthernProvince a owl:Class ;
+    rdfs:label "Southern Province"^^xsd:string ;
+    rdfs:subClassOf ns1:Province .
+
+ns1:StAnthonysShrine a ns1:ChristianChurch,
+        ns1:FreeEntrySite,
+        ns1:ReligiousPilgrimageSite,
+        owl:NamedIndividual ;
+    rdfs:label "St. Anthony's Shrine"^^xsd:string ;
+    ns1:hasActivity ns1:PilgrimageActivity ;
+    ns1:hasEntryFeeUSD 0.0 ;
+    ns1:isUNESCOListed false ;
+    ns1:locatedIn ns1:WesternProv ;
+    ns1:locatedInCountry ns1:SriLanka ;
+    ns1:siteDescription "Popular Catholic shrine in Colombo, visited by people of all faiths."^^xsd:string .
+
+ns1:Surfing a owl:Class ;
+    rdfs:label "Surfing"^^xsd:string ;
+    rdfs:subClassOf ns1:Activity,
+        ns1:AdventureActivity .
+
+ns1:SurfingActivity a ns1:Surfing,
+        owl:NamedIndividual ;
+    rdfs:label "Surfing"^^xsd:string ;
+    ns1:isActivityOf ns1:BentotaBeach,
+        ns1:MirissaBeach .
+
+ns1:TeaPlantation a owl:Class ;
+    rdfs:label "Tea Plantation"^^xsd:string ;
+    rdfs:comment "A working tea estate open to visitors, part of Sri Lanka's Ceylon tea industry."^^xsd:string ;
+    rdfs:subClassOf ns1:CulturalSite .
+
+ns1:UvaProvince a owl:Class ;
+    rdfs:label "Uva Province"^^xsd:string ;
+    rdfs:subClassOf ns1:Province .
+
+ns1:WesternProvince a owl:Class ;
+    rdfs:label "Western Province"^^xsd:string ;
+    rdfs:subClassOf ns1:Province .
+
+ns1:WildlifeSanctuary a owl:Class ;
+    rdfs:label "Wildlife Sanctuary"^^xsd:string ;
+    rdfs:comment "A managed sanctuary for the protection of wildlife."^^xsd:string ;
+    rdfs:subClassOf ns1:NaturalSite .
+
+ns1:YalaNationalPark a ns1:AdventureSite,
+        ns1:NationalPark,
+        owl:NamedIndividual ;
+    rdfs:label "Yala National Park"^^xsd:string ;
+    ns1:hasActivity ns1:SafariActivity ;
+    ns1:hasEntryFeeUSD 15.0 ;
+    ns1:isUNESCOListed false ;
+    ns1:locatedIn ns1:SouthernProv ;
+    ns1:locatedInCountry ns1:SriLanka ;
+    ns1:siteDescription "Sri Lanka's most visited national park, famous for leopards."^^xsd:string ;
+    ns1:yearInscribed "1938"^^xsd:int .
+
+ns1:locatedIn a owl:FunctionalProperty,
+        owl:ObjectProperty ;
+    rdfs:label "located in"^^xsd:string ;
+    rdfs:comment "Relates a tourist site to the single province it is located in. Functional: a site has exactly one province."^^xsd:string ;
+    rdfs:domain ns1:TouristSite ;
+    rdfs:range ns1:Province ;
+    owl:inverseOf ns1:isLocationOf .
+
+ns1:AdamsPeak a ns1:AdventureSite,
+        ns1:FreeEntrySite,
+        ns1:MountainPeak,
+        owl:NamedIndividual ;
+    rdfs:label "Adam's Peak"^^xsd:string ;
+    ns1:hasActivity ns1:HikingActivity,
+        ns1:PilgrimageActivity ;
+    ns1:hasElevationMeters 2243.0 ;
+    ns1:hasEntryFeeUSD 0.0 ;
+    ns1:isUNESCOListed false ;
+    ns1:locatedIn ns1:SabaragamuwaProv ;
+    ns1:locatedInCountry ns1:SriLanka ;
+    ns1:siteDescription "Sacred mountain (Sri Pada) revered by multiple religions, climbed at night."^^xsd:string .
+
+ns1:Beach a owl:Class ;
+    rdfs:label "Beach"^^xsd:string ;
+    rdfs:comment "A coastal recreational site."^^xsd:string ;
+    rdfs:subClassOf ns1:NaturalSite .
+
+ns1:BentotaBeach a ns1:AdventureSite,
+        ns1:Beach,
+        ns1:FreeEntrySite,
+        owl:NamedIndividual ;
+    rdfs:label "Bentota Beach"^^xsd:string ;
+    ns1:hasActivity ns1:SightseeingActivity,
+        ns1:SurfingActivity ;
+    ns1:hasEntryFeeUSD 0.0 ;
+    ns1:isUNESCOListed false ;
+    ns1:locatedIn ns1:WesternProv ;
+    ns1:locatedInCountry ns1:SriLanka ;
+    ns1:siteDescription "Popular beach resort town known for water sports."^^xsd:string .
+
+ns1:DiyalumaFalls a ns1:AdventureSite,
+        ns1:FreeEntrySite,
+        ns1:Waterfall,
+        owl:NamedIndividual ;
+    rdfs:label "Diyaluma Falls"^^xsd:string ;
+    ns1:hasActivity ns1:HikingActivity,
+        ns1:PhotographyActivity ;
+    ns1:hasEntryFeeUSD 0.0 ;
+    ns1:isUNESCOListed false ;
+    ns1:locatedIn ns1:UvaProv ;
+    ns1:locatedInCountry ns1:SriLanka ;
+    ns1:siteDescription "Sri Lanka's second-highest waterfall, reached via a hiking trail."^^xsd:string .
+
+ns1:HeritageSite a owl:Class ;
+    rdfs:label "Heritage Site"^^xsd:string ;
+    rdfs:comment "A site of historical, religious, or archaeological significance."^^xsd:string ;
+    rdfs:subClassOf ns1:TouristSite .
+
+ns1:Hiking a owl:Class ;
+    rdfs:label "Hiking"^^xsd:string ;
+    rdfs:subClassOf ns1:Activity,
+        ns1:AdventureActivity .
+
+ns1:HortonPlainsNationalPark a ns1:AdventureSite,
+        ns1:NationalPark,
+        ns1:UNESCOWorldHeritageSite,
+        owl:NamedIndividual ;
+    rdfs:label "Horton Plains National Park"^^xsd:string ;
+    ns1:hasActivity ns1:HikingActivity,
+        ns1:SafariActivity ;
+    ns1:hasElevationMeters 2100.0 ;
+    ns1:hasEntryFeeUSD 20.0 ;
+    ns1:isUNESCOListed true ;
+    ns1:locatedIn ns1:CentralProv ;
+    ns1:locatedInCountry ns1:SriLanka ;
+    ns1:siteDescription "Highland plateau national park, home to World's End cliff."^^xsd:string .
+
+ns1:JamiUlAlfarMosque a ns1:FreeEntrySite,
+        ns1:MosqueSite,
+        owl:NamedIndividual ;
+    rdfs:label "Jami-Ul-Alfar Mosque"^^xsd:string ;
+    ns1:hasActivity ns1:PhotographyActivity,
+        ns1:SightseeingActivity ;
+    ns1:hasEntryFeeUSD 0.0 ;
+    ns1:isUNESCOListed false ;
+    ns1:locatedIn ns1:WesternProv ;
+    ns1:locatedInCountry ns1:SriLanka ;
+    ns1:siteDescription "Iconic red-and-white candy-striped mosque in Colombo Pettah."^^xsd:string ;
+    ns1:yearInscribed "1909"^^xsd:int .
+
+ns1:MountainPeak a owl:Class ;
+    rdfs:label "Mountain Peak"^^xsd:string ;
+    rdfs:comment "A mountain or hill-country peak."^^xsd:string ;
+    rdfs:subClassOf ns1:NaturalSite .
+
+ns1:NationalPark a owl:Class ;
+    rdfs:label "National Park"^^xsd:string ;
+    rdfs:comment "A protected natural area managed for conservation and wildlife viewing. Activities offered at a national park are restricted to sightseeing, photography, hiking, and safari."^^xsd:string ;
+    rdfs:subClassOf [ a owl:Restriction ;
+            owl:allValuesFrom [ a owl:Class ;
+                    owl:unionOf ( ns1:Sightseeing ns1:Photography ns1:Hiking ns1:WildlifeSafari ) ] ;
+            owl:onProperty ns1:hasActivity ],
+        ns1:NaturalSite .
+
+ns1:Photography a owl:Class ;
+    rdfs:label "Photography"^^xsd:string ;
+    rdfs:subClassOf ns1:Activity .
+
+ns1:PinnawalaElephantOrphanage a ns1:WildlifeSanctuary,
+        owl:NamedIndividual ;
+    rdfs:label "Pinnawala Elephant Orphanage"^^xsd:string ;
+    ns1:hasActivity ns1:PhotographyActivity,
+        ns1:SightseeingActivity ;
+    ns1:hasEntryFeeUSD 12.0 ;
+    ns1:isUNESCOListed false ;
+    ns1:locatedIn ns1:CentralProv ;
+    ns1:locatedInCountry ns1:SriLanka ;
+    ns1:siteDescription "Sanctuary and orphanage for wild Asian elephants."^^xsd:string ;
+    ns1:yearInscribed "1975"^^xsd:int .
+
+ns1:ReligiousPilgrimageSite a owl:Class ;
+    rdfs:label "Religious Pilgrimage Site"^^xsd:string ;
+    rdfs:comment "Defined class: any religious site that offers pilgrimage as an activity."^^xsd:string ;
+    rdfs:subClassOf ns1:ReligiousSite ;
+    owl:equivalentClass [ a owl:Class ;
+            owl:intersectionOf ( ns1:ReligiousSite [ a owl:Restriction ;
+                        owl:hasValue ns1:PilgrimageActivity ;
+                        owl:onProperty ns1:hasActivity ] ) ] .
+
+ns1:RoyalBotanicalGardenPeradeniya a ns1:BotanicalGarden,
+        owl:NamedIndividual ;
+    rdfs:label "Royal Botanical Garden, Peradeniya"^^xsd:string ;
+    ns1:hasActivity ns1:PhotographyActivity,
+        ns1:SightseeingActivity ;
+    ns1:hasEntryFeeUSD 8.0 ;
+    ns1:isUNESCOListed false ;
+    ns1:locatedIn ns1:CentralProv ;
+    ns1:locatedInCountry ns1:SriLanka ;
+    ns1:siteDescription "Large botanical garden near Kandy with orchid houses and giant bamboo."^^xsd:string ;
+    ns1:yearInscribed "1843"^^xsd:int .
+
+ns1:Sightseeing a owl:Class ;
+    rdfs:label "Sightseeing"^^xsd:string ;
+    rdfs:subClassOf ns1:Activity .
+
+ns1:SouthernProv a ns1:SouthernProvince,
+        owl:NamedIndividual ;
+    rdfs:label "Southern Province"^^xsd:string ;
+    ns1:isLocationOf ns1:GalleFort,
+        ns1:MirissaBeach,
+        ns1:YalaNationalPark ;
+    ns1:partOfRegion ns1:SriLanka .
+
+ns1:TempleOfTheTooth a ns1:BuddhistTemple,
+        ns1:ReligiousPilgrimageSite,
+        ns1:UNESCOWorldHeritageSite,
+        owl:NamedIndividual ;
+    rdfs:label "Temple of the Tooth"^^xsd:string ;
+    ns1:hasActivity ns1:PilgrimageActivity,
+        ns1:SightseeingActivity ;
+    ns1:hasEntryFeeUSD 10.0 ;
+    ns1:isUNESCOListed true ;
+    ns1:locatedIn ns1:CentralProv ;
+    ns1:locatedInCountry ns1:SriLanka ;
+    ns1:siteDescription "Sacred Buddhist temple in Kandy housing a relic of the tooth of the Buddha."^^xsd:string ;
+    ns1:yearInscribed "1595"^^xsd:int .
+
+ns1:UvaProv a ns1:UvaProvince,
+        owl:NamedIndividual ;
+    rdfs:label "Uva Province"^^xsd:string ;
+    ns1:isLocationOf ns1:DiyalumaFalls,
+        ns1:EllaRock,
+        ns1:RavanaFalls ;
+    ns1:partOfRegion ns1:SriLanka .
+
+ns1:Waterfall a owl:Class ;
+    rdfs:label "Waterfall"^^xsd:string ;
+    rdfs:comment "A natural waterfall site."^^xsd:string ;
+    rdfs:subClassOf ns1:NaturalSite .
+
+ns1:WildlifeSafari a owl:Class ;
+    rdfs:label "Wildlife Safari"^^xsd:string ;
+    rdfs:subClassOf ns1:Activity,
+        ns1:AdventureActivity .
+
+ns1:hasActivity a owl:ObjectProperty ;
+    rdfs:label "has activity"^^xsd:string ;
+    rdfs:comment "Relates a tourist site to an activity that can be done there."^^xsd:string ;
+    rdfs:domain ns1:TouristSite ;
+    rdfs:range ns1:Activity ;
+    owl:inverseOf ns1:isActivityOf .
+
+ns1:AdventureActivity a owl:Class ;
+    rdfs:label "Adventure Activity"^^xsd:string ;
+    rdfs:comment "An outdoor, physically active pursuit. Used to define AdventureSite."^^xsd:string ;
+    rdfs:subClassOf ns1:Activity .
+
+ns1:AncientCity a owl:Class ;
+    rdfs:label "Ancient City"^^xsd:string ;
+    rdfs:comment "The ruins of a historical city or settlement."^^xsd:string ;
+    rdfs:subClassOf ns1:ArchaeologicalSite .
+
+ns1:AnuradhapuraAncientCity a ns1:AncientCity,
+        ns1:UNESCOWorldHeritageSite,
+        owl:NamedIndividual ;
+    rdfs:label "Anuradhapura"^^xsd:string ;
+    ns1:hasActivity ns1:PilgrimageActivity,
+        ns1:SightseeingActivity ;
+    ns1:hasEntryFeeUSD 25.0 ;
+    ns1:isUNESCOListed true ;
+    ns1:locatedIn ns1:NorthCentralProv ;
+    ns1:locatedInCountry ns1:SriLanka ;
+    ns1:nearbyTo ns1:PolonnaruwaAncientCity ;
+    ns1:siteDescription "Sri Lanka's first ancient capital, a major Buddhist pilgrimage site."^^xsd:string ;
+    ns1:yearInscribed "1982"^^xsd:int .
+
+ns1:ArchaeologicalSite a owl:Class ;
+    rdfs:label "Archaeological Site"^^xsd:string ;
+    rdfs:comment "A heritage site consisting of historical ruins or remains."^^xsd:string ;
+    rdfs:subClassOf ns1:HeritageSite .
+
+ns1:CulturalSite a owl:Class ;
+    rdfs:label "Cultural Site"^^xsd:string ;
+    rdfs:comment "A site representing living culture, industry, or curated knowledge, such as a museum or plantation."^^xsd:string ;
+    rdfs:subClassOf ns1:TouristSite .
+
+ns1:DambullaCaveTemple a ns1:CaveTempleSite,
+        ns1:UNESCOWorldHeritageSite,
+        owl:NamedIndividual ;
+    rdfs:label "Dambulla Cave Temple"^^xsd:string ;
+    ns1:hasActivity ns1:PilgrimageActivity,
+        ns1:SightseeingActivity ;
+    ns1:hasEntryFeeUSD 10.0 ;
+    ns1:isUNESCOListed true ;
+    ns1:locatedIn ns1:CentralProv ;
+    ns1:locatedInCountry ns1:SriLanka ;
+    ns1:nearbyTo ns1:Sigiriya ;
+    ns1:siteDescription "Cave temple complex with Buddhist murals and statues dating back 2,000 years."^^xsd:string ;
+    ns1:yearInscribed "1991"^^xsd:int .
+
+ns1:EllaRock a ns1:AdventureSite,
+        ns1:FreeEntrySite,
+        ns1:MountainPeak,
+        owl:NamedIndividual ;
+    rdfs:label "Ella Rock"^^xsd:string ;
+    ns1:hasActivity ns1:HikingActivity,
+        ns1:PhotographyActivity ;
+    ns1:hasElevationMeters 1041.0 ;
+    ns1:hasEntryFeeUSD 0.0 ;
+    ns1:isUNESCOListed false ;
+    ns1:locatedIn ns1:UvaProv ;
+    ns1:locatedInCountry ns1:SriLanka ;
+    ns1:nearbyTo ns1:RavanaFalls ;
+    ns1:siteDescription "Popular hiking peak in the hill country town of Ella."^^xsd:string .
+
+ns1:GalleFort a ns1:FortSite,
+        ns1:FreeEntrySite,
+        ns1:UNESCOWorldHeritageSite,
+        owl:NamedIndividual ;
+    rdfs:label "Galle Fort"^^xsd:string ;
+    ns1:hasActivity ns1:PhotographyActivity,
+        ns1:SightseeingActivity ;
+    ns1:hasEntryFeeUSD 0.0 ;
+    ns1:isUNESCOListed true ;
+    ns1:locatedIn ns1:SouthernProv ;
+    ns1:locatedInCountry ns1:SriLanka ;
+    ns1:nearbyTo ns1:MirissaBeach ;
+    ns1:siteDescription "Colonial-era fortified city built by the Portuguese and Dutch."^^xsd:string ;
+    ns1:yearInscribed "1663"^^xsd:int .
+
+ns1:GeographicRegion a owl:Class ;
+    rdfs:label "Geographic Region"^^xsd:string ;
+    rdfs:comment "A geographic administrative area, such as a Province or a Country."^^xsd:string .
+
+ns1:HikingActivity a ns1:Hiking,
+        owl:NamedIndividual ;
+    rdfs:label "Hiking"^^xsd:string ;
+    ns1:isActivityOf ns1:AdamsPeak,
+        ns1:DiyalumaFalls,
+        ns1:EllaRock,
+        ns1:HortonPlainsNationalPark .
+
+ns1:MirissaBeach a ns1:AdventureSite,
+        ns1:Beach,
+        ns1:FreeEntrySite,
+        owl:NamedIndividual ;
+    rdfs:label "Mirissa Beach"^^xsd:string ;
+    ns1:hasActivity ns1:SightseeingActivity,
+        ns1:SurfingActivity ;
+    ns1:hasEntryFeeUSD 0.0 ;
+    ns1:isUNESCOListed false ;
+    ns1:locatedIn ns1:SouthernProv ;
+    ns1:locatedInCountry ns1:SriLanka ;
+    ns1:nearbyTo ns1:GalleFort ;
+    ns1:siteDescription "Popular south-coast beach known for surfing and whale watching."^^xsd:string .
+
+ns1:PolonnaruwaAncientCity a ns1:AncientCity,
+        ns1:UNESCOWorldHeritageSite,
+        owl:NamedIndividual ;
+    rdfs:label "Polonnaruwa"^^xsd:string ;
+    ns1:hasActivity ns1:PhotographyActivity,
+        ns1:SightseeingActivity ;
+    ns1:hasEntryFeeUSD 25.0 ;
+    ns1:isUNESCOListed true ;
+    ns1:locatedIn ns1:NorthCentralProv ;
+    ns1:locatedInCountry ns1:SriLanka ;
+    ns1:nearbyTo ns1:AnuradhapuraAncientCity ;
+    ns1:siteDescription "Ruins of Sri Lanka's second ancient capital."^^xsd:string ;
+    ns1:yearInscribed "1982"^^xsd:int .
+
+ns1:RavanaFalls a ns1:FreeEntrySite,
+        ns1:Waterfall,
+        owl:NamedIndividual ;
+    rdfs:label "Ravana Falls"^^xsd:string ;
+    ns1:hasActivity ns1:PhotographyActivity,
+        ns1:SightseeingActivity ;
+    ns1:hasEntryFeeUSD 0.0 ;
+    ns1:isUNESCOListed false ;
+    ns1:locatedIn ns1:UvaProv ;
+    ns1:locatedInCountry ns1:SriLanka ;
+    ns1:nearbyTo ns1:EllaRock ;
+    ns1:siteDescription "Wide cascading waterfall near Ella, linked to Ramayana legend."^^xsd:string .
+
+ns1:Sigiriya a ns1:AncientCity,
+        ns1:UNESCOWorldHeritageSite,
+        owl:NamedIndividual ;
+    rdfs:label "Sigiriya"^^xsd:string ;
+    ns1:hasActivity ns1:PhotographyActivity,
+        ns1:SightseeingActivity ;
+    ns1:hasElevationMeters 200.0 ;
+    ns1:hasEntryFeeUSD 30.0 ;
+    ns1:isUNESCOListed true ;
+    ns1:locatedIn ns1:CentralProv ;
+    ns1:locatedInCountry ns1:SriLanka ;
+    ns1:nearbyTo ns1:DambullaCaveTemple ;
+    ns1:siteDescription "Ancient rock fortress and palace ruin with famous frescoes."^^xsd:string ;
+    ns1:yearInscribed "1982"^^xsd:int .
+
+ns1:WesternProv a ns1:WesternProvince,
+        owl:NamedIndividual ;
+    rdfs:label "Western Province"^^xsd:string ;
+    ns1:isLocationOf ns1:BentotaBeach,
+        ns1:ColomboNationalMuseum,
+        ns1:JamiUlAlfarMosque,
+        ns1:StAnthonysShrine ;
+    ns1:partOfRegion ns1:SriLanka .
+
+ns1:NaturalSite a owl:Class ;
+    rdfs:label "Natural Site"^^xsd:string ;
+    rdfs:comment "A site whose main attraction is a natural feature or wildlife."^^xsd:string ;
+    rdfs:subClassOf ns1:TouristSite .
+
+ns1:AdventureSite a owl:Class ;
+    rdfs:label "Adventure Site"^^xsd:string ;
+    rdfs:comment "Defined class: any tourist site offering at least one adventure activity (hiking, safari, or surfing)."^^xsd:string ;
+    rdfs:subClassOf ns1:TouristSite ;
+    owl:equivalentClass [ a owl:Class ;
+            owl:intersectionOf ( ns1:TouristSite [ a owl:Restriction ;
+                        owl:onProperty ns1:hasActivity ;
+                        owl:someValuesFrom ns1:AdventureActivity ] ) ] .
+
+ns1:CentralProv a ns1:CentralProvince,
+        owl:NamedIndividual ;
+    rdfs:label "Central Province"^^xsd:string ;
+    ns1:isLocationOf ns1:DambullaCaveTemple,
+        ns1:HortonPlainsNationalPark,
+        ns1:NuwaraEliyaTeaEstate,
+        ns1:PinnawalaElephantOrphanage,
+        ns1:RoyalBotanicalGardenPeradeniya,
+        ns1:Sigiriya,
+        ns1:TempleOfTheTooth ;
+    ns1:partOfRegion ns1:SriLanka .
+
+ns1:PilgrimageActivity a ns1:Pilgrimage,
+        owl:NamedIndividual ;
+    rdfs:label "Pilgrimage"^^xsd:string ;
+    ns1:isActivityOf ns1:AdamsPeak,
+        ns1:AnuradhapuraAncientCity,
+        ns1:DambullaCaveTemple,
+        ns1:NallurKovil,
+        ns1:StAnthonysShrine,
+        ns1:TempleOfTheTooth .
+
+ns1:ReligiousSite a owl:Class ;
+    rdfs:label "Religious Site"^^xsd:string ;
+    rdfs:comment "A heritage site used for worship or pilgrimage."^^xsd:string ;
+    rdfs:subClassOf ns1:HeritageSite .
+
+ns1:UNESCOWorldHeritageSite a owl:Class ;
+    rdfs:label "UNESCO World Heritage Site"^^xsd:string ;
+    rdfs:comment "Defined class: any tourist site whose isUNESCOListed value is true. Membership is inferred by the reasoner, never asserted directly."^^xsd:string ;
+    rdfs:subClassOf ns1:TouristSite ;
+    owl:equivalentClass [ a owl:Class ;
+            owl:intersectionOf ( ns1:TouristSite [ a owl:Restriction ;
+                        owl:hasValue true ;
+                        owl:onProperty ns1:isUNESCOListed ] ) ] .
+
+ns1:Activity a owl:Class ;
+    rdfs:label "Activity"^^xsd:string ;
+    rdfs:comment "Something a visitor can do at a tourist site."^^xsd:string .
+
+ns1:PhotographyActivity a ns1:Photography,
+        owl:NamedIndividual ;
+    rdfs:label "Photography"^^xsd:string ;
+    ns1:isActivityOf ns1:DiyalumaFalls,
+        ns1:EllaRock,
+        ns1:GalleFort,
+        ns1:JamiUlAlfarMosque,
+        ns1:PinnawalaElephantOrphanage,
+        ns1:PolonnaruwaAncientCity,
+        ns1:RavanaFalls,
+        ns1:RoyalBotanicalGardenPeradeniya,
+        ns1:Sigiriya .
+
+ns1:FreeEntrySite a owl:Class ;
+    rdfs:label "Free Entry Site"^^xsd:string ;
+    rdfs:comment "Defined class: any tourist site with a 0.0 USD entry fee. Membership is inferred by the reasoner."^^xsd:string ;
+    rdfs:subClassOf ns1:TouristSite ;
+    owl:equivalentClass [ a owl:Class ;
+            owl:intersectionOf ( ns1:TouristSite [ a owl:Restriction ;
+                        owl:hasValue 0.0 ;
+                        owl:onProperty ns1:hasEntryFeeUSD ] ) ] .
+
+ns1:Province a owl:Class ;
+    rdfs:label "Province"^^xsd:string ;
+    rdfs:comment "One of Sri Lanka's nine administrative provinces."^^xsd:string ;
+    rdfs:subClassOf ns1:GeographicRegion .
+
+ns1:SightseeingActivity a ns1:Sightseeing,
+        owl:NamedIndividual ;
+    rdfs:label "Sightseeing"^^xsd:string ;
+    ns1:isActivityOf ns1:AnuradhapuraAncientCity,
+        ns1:BentotaBeach,
+        ns1:ColomboNationalMuseum,
+        ns1:DambullaCaveTemple,
+        ns1:GalleFort,
+        ns1:JamiUlAlfarMosque,
+        ns1:MirissaBeach,
+        ns1:NuwaraEliyaTeaEstate,
+        ns1:PinnawalaElephantOrphanage,
+        ns1:PolonnaruwaAncientCity,
+        ns1:RavanaFalls,
+        ns1:RoyalBotanicalGardenPeradeniya,
+        ns1:Sigiriya,
+        ns1:TempleOfTheTooth .
+
+ns1:TouristSite a owl:Class ;
+    rdfs:label "Tourist Site"^^xsd:string ;
+    rdfs:comment "The top-level class for any place in Sri Lanka that tourists can visit. Every tourist site is located in exactly one province."^^xsd:string ;
+    rdfs:subClassOf [ a owl:Restriction ;
+            owl:onClass ns1:Province ;
+            owl:onProperty ns1:locatedIn ;
+            owl:qualifiedCardinality "1"^^xsd:nonNegativeInteger ] .
+
+ns1:SriLanka a ns1:Country,
+        owl:NamedIndividual ;
+    rdfs:label "Sri Lanka"^^xsd:string .
+
+[] a owl:AllDisjointClasses ;
+    owl:members ( ns1:HeritageSite ns1:NaturalSite ns1:CulturalSite ) .
+
+[] a owl:AllDisjointClasses ;
+    owl:members ( ns1:BuddhistTemple ns1:HinduKovil ns1:ChristianChurch ns1:MosqueSite ) .
+
+[] a owl:AllDisjointClasses ;
+    owl:members ( ns1:ReligiousSite ns1:ArchaeologicalSite ) .
+
+[] a owl:AllDisjointClasses ;
+    owl:members ( ns1:NationalPark ns1:Beach ns1:Waterfall ns1:MountainPeak ns1:WildlifeSanctuary ) .
+
+[] a owl:AllDisjointClasses ;
+    owl:members ( ns1:WesternProvince ns1:CentralProvince ns1:SouthernProvince ns1:UvaProvince ns1:SabaragamuwaProvince ns1:NorthCentralProvince ns1:NorthWesternProvince ns1:NorthernProvince ns1:EasternProvince ) .
+
+[] a owl:AllDisjointClasses ;
+    owl:members ( ns1:Hiking ns1:WildlifeSafari ns1:Surfing ns1:Pilgrimage ns1:Sightseeing ns1:Photography ) .
+
+[] a owl:AllDisjointClasses ;
+    owl:members ( ns1:AncientCity ns1:FortSite ns1:CaveTempleSite ) .
+
+[] a owl:AllDisjointClasses ;
+    owl:members ( ns1:Museum ns1:TeaPlantation ns1:BotanicalGarden ) .
+

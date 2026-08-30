@@ -1,0 +1,649 @@
+@prefix : <http://www.srilanka-heritage.org/ontology#> .
+@prefix owl: <http://www.w3.org/2002/07/owl#> .
+@prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+@prefix xml: <http://www.w3.org/XML/1998/namespace> .
+@prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+@base <http://www.srilanka-heritage.org/ontology> .
+
+<http://www.srilanka-heritage.org/ontology> rdf:type owl:Ontology ;
+    rdfs:label "Sri Lanka Heritage and Tourism Sites Ontology" ;
+    rdfs:comment "An ontology describing Sri Lanka's heritage and tourism sites: their type, geographic location, activities offered, UNESCO status, and entry fees. Developed as coursework for Semantic Web and Ontologies." .
+
+
+#################################################################
+#
+#    Object Properties
+#
+#################################################################
+
+###  locatedIn
+:locatedIn rdf:type owl:ObjectProperty , owl:FunctionalProperty ;
+    rdfs:label "located in" ;
+    rdfs:domain :TouristSite ;
+    rdfs:range :Province ;
+    owl:inverseOf :isLocationOf ;
+    rdfs:comment "Relates a tourist site to the single province it is located in. Functional: a site has exactly one province." .
+
+###  isLocationOf
+:isLocationOf rdf:type owl:ObjectProperty ;
+    rdfs:label "is location of" ;
+    rdfs:domain :Province ;
+    rdfs:range :TouristSite ;
+    rdfs:comment "Inverse of locatedIn." .
+
+###  hasActivity
+:hasActivity rdf:type owl:ObjectProperty ;
+    rdfs:label "has activity" ;
+    rdfs:domain :TouristSite ;
+    rdfs:range :Activity ;
+    owl:inverseOf :isActivityOf ;
+    rdfs:comment "Relates a tourist site to an activity that can be done there." .
+
+###  isActivityOf
+:isActivityOf rdf:type owl:ObjectProperty ;
+    rdfs:label "is activity of" ;
+    rdfs:domain :Activity ;
+    rdfs:range :TouristSite ;
+    rdfs:comment "Inverse of hasActivity." .
+
+###  partOfRegion
+:partOfRegion rdf:type owl:ObjectProperty , owl:TransitiveProperty ;
+    rdfs:label "part of region" ;
+    rdfs:domain :GeographicRegion ;
+    rdfs:range :GeographicRegion ;
+    rdfs:comment "Relates a geographic region to the larger region that contains it (e.g. a Province is part of the Country). Transitive, so containment chains correctly." .
+
+###  nearbyTo
+:nearbyTo rdf:type owl:ObjectProperty , owl:SymmetricProperty ;
+    rdfs:label "nearby to" ;
+    rdfs:domain :TouristSite ;
+    rdfs:range :TouristSite ;
+    rdfs:comment "Relates two tourist sites that are geographically close enough to visit on the same trip. Symmetric: if A is nearby B, then B is nearby A." .
+
+###  locatedInCountry (derived via property chain, not asserted directly)
+:locatedInCountry rdf:type owl:ObjectProperty ;
+    rdfs:label "located in country" ;
+    rdfs:domain :TouristSite ;
+    rdfs:range :Country ;
+    rdfs:comment "Derived property: a tourist site's country, inferred via the property chain locatedIn o partOfRegion. Never asserted directly on an individual." ;
+    owl:propertyChainAxiom ( :locatedIn :partOfRegion ) .
+
+
+#################################################################
+#
+#    Data Properties
+#
+#################################################################
+
+###  hasEntryFeeUSD
+:hasEntryFeeUSD rdf:type owl:DatatypeProperty , owl:FunctionalProperty ;
+    rdfs:label "has entry fee (USD)" ;
+    rdfs:domain :TouristSite ;
+    rdfs:range xsd:decimal ;
+    rdfs:comment "Foreign-visitor entry fee in US dollars. 0.0 means free entry." .
+
+###  yearInscribed
+:yearInscribed rdf:type owl:DatatypeProperty , owl:FunctionalProperty ;
+    rdfs:label "year inscribed" ;
+    rdfs:domain :TouristSite ;
+    rdfs:range xsd:int ;
+    rdfs:comment "Year the site was established, built, or UNESCO-inscribed." .
+
+###  isUNESCOListed
+:isUNESCOListed rdf:type owl:DatatypeProperty , owl:FunctionalProperty ;
+    rdfs:label "is UNESCO listed" ;
+    rdfs:domain :TouristSite ;
+    rdfs:range xsd:boolean ;
+    rdfs:comment "True if the site is a UNESCO World Heritage Site." .
+
+###  hasElevationMeters
+:hasElevationMeters rdf:type owl:DatatypeProperty , owl:FunctionalProperty ;
+    rdfs:label "has elevation (m)" ;
+    rdfs:domain :TouristSite ;
+    rdfs:range xsd:decimal ;
+    rdfs:comment "Elevation of the site above sea level, in metres." .
+
+###  siteDescription
+:siteDescription rdf:type owl:DatatypeProperty , owl:FunctionalProperty ;
+    rdfs:label "site description" ;
+    rdfs:domain :TouristSite ;
+    rdfs:range xsd:string ;
+    rdfs:comment "A short human-readable description of the site." .
+
+
+#################################################################
+#
+#    Classes - Top level
+#
+#################################################################
+
+###  TouristSite
+:TouristSite rdf:type owl:Class ;
+    rdfs:label "Tourist Site" ;
+    rdfs:comment "The top-level class for any place in Sri Lanka that tourists can visit. Every tourist site is located in exactly one province." ;
+    rdfs:subClassOf [ rdf:type owl:Restriction ;
+                       owl:onProperty :locatedIn ;
+                       owl:onClass :Province ;
+                       owl:qualifiedCardinality "1"^^xsd:nonNegativeInteger
+                     ] .
+
+###  GeographicRegion
+:GeographicRegion rdf:type owl:Class ;
+    rdfs:label "Geographic Region" ;
+    rdfs:comment "A geographic administrative area, such as a Province or a Country." .
+
+###  Province
+:Province rdf:type owl:Class ;
+    rdfs:label "Province" ;
+    rdfs:comment "One of Sri Lanka's nine administrative provinces." ;
+    rdfs:subClassOf :GeographicRegion .
+
+###  Country
+:Country rdf:type owl:Class ;
+    rdfs:label "Country" ;
+    rdfs:comment "A sovereign country. Used here so that a site's country membership can be inferred through a property chain." ;
+    rdfs:subClassOf :GeographicRegion .
+
+###  Activity
+:Activity rdf:type owl:Class ;
+    rdfs:label "Activity" ;
+    rdfs:comment "Something a visitor can do at a tourist site." .
+
+###  AdventureActivity
+:AdventureActivity rdf:type owl:Class ;
+    rdfs:label "Adventure Activity" ;
+    rdfs:comment "An outdoor, physically active pursuit. Used to define AdventureSite." ;
+    rdfs:subClassOf :Activity .
+
+
+#################################################################
+#
+#    Classes - Site type hierarchy
+#
+#################################################################
+
+###  HeritageSite
+:HeritageSite rdf:type owl:Class ;
+    rdfs:label "Heritage Site" ;
+    rdfs:comment "A site of historical, religious, or archaeological significance." ;
+    rdfs:subClassOf :TouristSite .
+
+###  NaturalSite
+:NaturalSite rdf:type owl:Class ;
+    rdfs:label "Natural Site" ;
+    rdfs:comment "A site whose main attraction is a natural feature or wildlife." ;
+    rdfs:subClassOf :TouristSite .
+
+###  CulturalSite
+:CulturalSite rdf:type owl:Class ;
+    rdfs:label "Cultural Site" ;
+    rdfs:comment "A site representing living culture, industry, or curated knowledge, such as a museum or plantation." ;
+    rdfs:subClassOf :TouristSite .
+
+### -- HeritageSite children --
+
+###  ReligiousSite
+:ReligiousSite rdf:type owl:Class ;
+    rdfs:label "Religious Site" ;
+    rdfs:comment "A heritage site used for worship or pilgrimage." ;
+    rdfs:subClassOf :HeritageSite .
+
+###  ArchaeologicalSite
+:ArchaeologicalSite rdf:type owl:Class ;
+    rdfs:label "Archaeological Site" ;
+    rdfs:comment "A heritage site consisting of historical ruins or remains." ;
+    rdfs:subClassOf :HeritageSite .
+
+###  BuddhistTemple
+:BuddhistTemple rdf:type owl:Class ;
+    rdfs:label "Buddhist Temple" ;
+    rdfs:comment "A religious site used for Buddhist worship." ;
+    rdfs:subClassOf :ReligiousSite .
+
+###  HinduKovil
+:HinduKovil rdf:type owl:Class ;
+    rdfs:label "Hindu Kovil" ;
+    rdfs:comment "A religious site used for Hindu worship." ;
+    rdfs:subClassOf :ReligiousSite .
+
+###  ChristianChurch
+:ChristianChurch rdf:type owl:Class ;
+    rdfs:label "Christian Church" ;
+    rdfs:comment "A religious site used for Christian worship." ;
+    rdfs:subClassOf :ReligiousSite .
+
+###  MosqueSite
+:MosqueSite rdf:type owl:Class ;
+    rdfs:label "Mosque" ;
+    rdfs:comment "A religious site used for Islamic worship." ;
+    rdfs:subClassOf :ReligiousSite .
+
+###  AncientCity
+:AncientCity rdf:type owl:Class ;
+    rdfs:label "Ancient City" ;
+    rdfs:comment "The ruins of a historical city or settlement." ;
+    rdfs:subClassOf :ArchaeologicalSite .
+
+###  FortSite
+:FortSite rdf:type owl:Class ;
+    rdfs:label "Fort" ;
+    rdfs:comment "A fortified historical structure or fortified town." ;
+    rdfs:subClassOf :ArchaeologicalSite .
+
+###  CaveTempleSite
+:CaveTempleSite rdf:type owl:Class ;
+    rdfs:label "Cave Temple" ;
+    rdfs:comment "A temple built within a natural cave." ;
+    rdfs:subClassOf :ArchaeologicalSite .
+
+### -- NaturalSite children --
+
+###  NationalPark
+:NationalPark rdf:type owl:Class ;
+    rdfs:label "National Park" ;
+    rdfs:comment "A protected natural area managed for conservation and wildlife viewing. Activities offered at a national park are restricted to sightseeing, photography, hiking, and safari." ;
+    rdfs:subClassOf :NaturalSite ,
+        [ rdf:type owl:Restriction ;
+          owl:onProperty :hasActivity ;
+          owl:allValuesFrom [ rdf:type owl:Class ;
+                               owl:unionOf ( :Sightseeing :Photography :Hiking :WildlifeSafari )
+                             ]
+        ] .
+
+###  Beach
+:Beach rdf:type owl:Class ;
+    rdfs:label "Beach" ;
+    rdfs:comment "A coastal recreational site." ;
+    rdfs:subClassOf :NaturalSite .
+
+###  Waterfall
+:Waterfall rdf:type owl:Class ;
+    rdfs:label "Waterfall" ;
+    rdfs:comment "A natural waterfall site." ;
+    rdfs:subClassOf :NaturalSite .
+
+###  MountainPeak
+:MountainPeak rdf:type owl:Class ;
+    rdfs:label "Mountain Peak" ;
+    rdfs:comment "A mountain or hill-country peak." ;
+    rdfs:subClassOf :NaturalSite .
+
+###  WildlifeSanctuary
+:WildlifeSanctuary rdf:type owl:Class ;
+    rdfs:label "Wildlife Sanctuary" ;
+    rdfs:comment "A managed sanctuary for the protection of wildlife." ;
+    rdfs:subClassOf :NaturalSite .
+
+### -- CulturalSite children --
+
+###  Museum
+:Museum rdf:type owl:Class ;
+    rdfs:label "Museum" ;
+    rdfs:comment "A museum housing cultural or historical artefacts." ;
+    rdfs:subClassOf :CulturalSite .
+
+###  TeaPlantation
+:TeaPlantation rdf:type owl:Class ;
+    rdfs:label "Tea Plantation" ;
+    rdfs:comment "A working tea estate open to visitors, part of Sri Lanka's Ceylon tea industry." ;
+    rdfs:subClassOf :CulturalSite .
+
+###  BotanicalGarden
+:BotanicalGarden rdf:type owl:Class ;
+    rdfs:label "Botanical Garden" ;
+    rdfs:comment "A curated garden of plant collections open to the public." ;
+    rdfs:subClassOf :CulturalSite .
+
+
+#################################################################
+#
+#    Classes - Province hierarchy
+#
+#################################################################
+
+:WesternProvince rdf:type owl:Class ; rdfs:label "Western Province" ; rdfs:subClassOf :Province .
+:CentralProvince rdf:type owl:Class ; rdfs:label "Central Province" ; rdfs:subClassOf :Province .
+:SouthernProvince rdf:type owl:Class ; rdfs:label "Southern Province" ; rdfs:subClassOf :Province .
+:UvaProvince rdf:type owl:Class ; rdfs:label "Uva Province" ; rdfs:subClassOf :Province .
+:SabaragamuwaProvince rdf:type owl:Class ; rdfs:label "Sabaragamuwa Province" ; rdfs:subClassOf :Province .
+:NorthCentralProvince rdf:type owl:Class ; rdfs:label "North Central Province" ; rdfs:subClassOf :Province .
+:NorthWesternProvince rdf:type owl:Class ; rdfs:label "North Western Province" ; rdfs:subClassOf :Province .
+:NorthernProvince rdf:type owl:Class ; rdfs:label "Northern Province" ; rdfs:subClassOf :Province .
+:EasternProvince rdf:type owl:Class ; rdfs:label "Eastern Province" ; rdfs:subClassOf :Province .
+
+
+#################################################################
+#
+#    Classes - Activity hierarchy
+#
+#################################################################
+
+:Hiking rdf:type owl:Class ; rdfs:label "Hiking" ; rdfs:subClassOf :Activity , :AdventureActivity .
+:WildlifeSafari rdf:type owl:Class ; rdfs:label "Wildlife Safari" ; rdfs:subClassOf :Activity , :AdventureActivity .
+:Surfing rdf:type owl:Class ; rdfs:label "Surfing" ; rdfs:subClassOf :Activity , :AdventureActivity .
+:Pilgrimage rdf:type owl:Class ; rdfs:label "Pilgrimage" ; rdfs:subClassOf :Activity .
+:Sightseeing rdf:type owl:Class ; rdfs:label "Sightseeing" ; rdfs:subClassOf :Activity .
+:Photography rdf:type owl:Class ; rdfs:label "Photography" ; rdfs:subClassOf :Activity .
+
+
+#################################################################
+#
+#    Defined (equivalent) classes - inferred membership by the reasoner
+#
+#################################################################
+
+###  UNESCOWorldHeritageSite
+:UNESCOWorldHeritageSite rdf:type owl:Class ;
+    rdfs:label "UNESCO World Heritage Site" ;
+    rdfs:comment "Defined class: any tourist site whose isUNESCOListed value is true. Membership is inferred by the reasoner, never asserted directly." ;
+    owl:equivalentClass [ rdf:type owl:Class ;
+                           owl:intersectionOf ( :TouristSite
+                                                 [ rdf:type owl:Restriction ;
+                                                   owl:onProperty :isUNESCOListed ;
+                                                   owl:hasValue true
+                                                 ]
+                                               )
+                         ] ;
+    rdfs:subClassOf :TouristSite .
+
+###  FreeEntrySite
+:FreeEntrySite rdf:type owl:Class ;
+    rdfs:label "Free Entry Site" ;
+    rdfs:comment "Defined class: any tourist site with a 0.0 USD entry fee. Membership is inferred by the reasoner." ;
+    owl:equivalentClass [ rdf:type owl:Class ;
+                           owl:intersectionOf ( :TouristSite
+                                                 [ rdf:type owl:Restriction ;
+                                                   owl:onProperty :hasEntryFeeUSD ;
+                                                   owl:hasValue "0.0"^^xsd:decimal
+                                                 ]
+                                               )
+                         ] ;
+    rdfs:subClassOf :TouristSite .
+
+###  AdventureSite
+:AdventureSite rdf:type owl:Class ;
+    rdfs:label "Adventure Site" ;
+    rdfs:comment "Defined class: any tourist site offering at least one adventure activity (hiking, safari, or surfing)." ;
+    owl:equivalentClass [ rdf:type owl:Class ;
+                           owl:intersectionOf ( :TouristSite
+                                                 [ rdf:type owl:Restriction ;
+                                                   owl:onProperty :hasActivity ;
+                                                   owl:someValuesFrom :AdventureActivity
+                                                 ]
+                                               )
+                         ] ;
+    rdfs:subClassOf :TouristSite .
+
+###  ReligiousPilgrimageSite
+:ReligiousPilgrimageSite rdf:type owl:Class ;
+    rdfs:label "Religious Pilgrimage Site" ;
+    rdfs:comment "Defined class: any religious site that offers pilgrimage as an activity." ;
+    owl:equivalentClass [ rdf:type owl:Class ;
+                           owl:intersectionOf ( :ReligiousSite
+                                                 [ rdf:type owl:Restriction ;
+                                                   owl:onProperty :hasActivity ;
+                                                   owl:hasValue :PilgrimageActivity
+                                                 ]
+                                               )
+                         ] ;
+    rdfs:subClassOf :ReligiousSite .
+
+
+#################################################################
+#
+#    General axioms - disjointness
+#
+#################################################################
+
+[ rdf:type owl:AllDisjointClasses ;
+  owl:members ( :HeritageSite :NaturalSite :CulturalSite )
+] .
+
+[ rdf:type owl:AllDisjointClasses ;
+  owl:members ( :ReligiousSite :ArchaeologicalSite )
+] .
+
+[ rdf:type owl:AllDisjointClasses ;
+  owl:members ( :BuddhistTemple :HinduKovil :ChristianChurch :MosqueSite )
+] .
+
+[ rdf:type owl:AllDisjointClasses ;
+  owl:members ( :AncientCity :FortSite :CaveTempleSite )
+] .
+
+[ rdf:type owl:AllDisjointClasses ;
+  owl:members ( :NationalPark :Beach :Waterfall :MountainPeak :WildlifeSanctuary )
+] .
+
+[ rdf:type owl:AllDisjointClasses ;
+  owl:members ( :Museum :TeaPlantation :BotanicalGarden )
+] .
+
+[ rdf:type owl:AllDisjointClasses ;
+  owl:members ( :WesternProvince :CentralProvince :SouthernProvince :UvaProvince
+                :SabaragamuwaProvince :NorthCentralProvince :NorthWesternProvince
+                :NorthernProvince :EasternProvince )
+] .
+
+[ rdf:type owl:AllDisjointClasses ;
+  owl:members ( :Hiking :WildlifeSafari :Surfing :Pilgrimage :Sightseeing :Photography )
+] .
+
+
+#################################################################
+#
+#    Individuals
+#
+#################################################################
+
+### Country individual
+:SriLanka rdf:type owl:NamedIndividual , :Country ;
+    rdfs:label "Sri Lanka" .
+
+### Activity individuals (used as hasValue targets)
+:PilgrimageActivity rdf:type owl:NamedIndividual , :Pilgrimage ; rdfs:label "Pilgrimage" .
+:HikingActivity rdf:type owl:NamedIndividual , :Hiking ; rdfs:label "Hiking" .
+:SafariActivity rdf:type owl:NamedIndividual , :WildlifeSafari ; rdfs:label "Wildlife Safari" .
+:SurfingActivity rdf:type owl:NamedIndividual , :Surfing ; rdfs:label "Surfing" .
+:SightseeingActivity rdf:type owl:NamedIndividual , :Sightseeing ; rdfs:label "Sightseeing" .
+:PhotographyActivity rdf:type owl:NamedIndividual , :Photography ; rdfs:label "Photography" .
+
+### Province individuals - each is partOfRegion Sri Lanka (enables the property-chain inference)
+:CentralProv rdf:type owl:NamedIndividual , :CentralProvince ; rdfs:label "Central Province" ; :partOfRegion :SriLanka .
+:SouthernProv rdf:type owl:NamedIndividual , :SouthernProvince ; rdfs:label "Southern Province" ; :partOfRegion :SriLanka .
+:WesternProv rdf:type owl:NamedIndividual , :WesternProvince ; rdfs:label "Western Province" ; :partOfRegion :SriLanka .
+:UvaProv rdf:type owl:NamedIndividual , :UvaProvince ; rdfs:label "Uva Province" ; :partOfRegion :SriLanka .
+:SabaragamuwaProv rdf:type owl:NamedIndividual , :SabaragamuwaProvince ; rdfs:label "Sabaragamuwa Province" ; :partOfRegion :SriLanka .
+:NorthCentralProv rdf:type owl:NamedIndividual , :NorthCentralProvince ; rdfs:label "North Central Province" ; :partOfRegion :SriLanka .
+:NorthernProv rdf:type owl:NamedIndividual , :NorthernProvince ; rdfs:label "Northern Province" ; :partOfRegion :SriLanka .
+
+### Site individuals
+
+:Sigiriya rdf:type owl:NamedIndividual , :AncientCity ;
+    rdfs:label "Sigiriya" ;
+    :locatedIn :CentralProv ;
+    :hasActivity :SightseeingActivity , :PhotographyActivity ;
+    :hasEntryFeeUSD "30.0"^^xsd:decimal ;
+    :yearInscribed "1982"^^xsd:int ;
+    :isUNESCOListed "true"^^xsd:boolean ;
+    :hasElevationMeters "200.0"^^xsd:decimal ;
+    :siteDescription "Ancient rock fortress and palace ruin with famous frescoes." .
+
+:TempleOfTheTooth rdf:type owl:NamedIndividual , :BuddhistTemple ;
+    rdfs:label "Temple of the Tooth" ;
+    :locatedIn :CentralProv ;
+    :hasActivity :PilgrimageActivity , :SightseeingActivity ;
+    :hasEntryFeeUSD "10.0"^^xsd:decimal ;
+    :yearInscribed "1595"^^xsd:int ;
+    :isUNESCOListed "true"^^xsd:boolean ;
+    :siteDescription "Sacred Buddhist temple in Kandy housing a relic of the tooth of the Buddha." .
+
+:GalleFort rdf:type owl:NamedIndividual , :FortSite ;
+    rdfs:label "Galle Fort" ;
+    :locatedIn :SouthernProv ;
+    :hasActivity :SightseeingActivity , :PhotographyActivity ;
+    :hasEntryFeeUSD "0.0"^^xsd:decimal ;
+    :yearInscribed "1663"^^xsd:int ;
+    :isUNESCOListed "true"^^xsd:boolean ;
+    :siteDescription "Colonial-era fortified city built by the Portuguese and Dutch." .
+
+:YalaNationalPark rdf:type owl:NamedIndividual , :NationalPark ;
+    rdfs:label "Yala National Park" ;
+    :locatedIn :SouthernProv ;
+    :hasActivity :SafariActivity ;
+    :hasEntryFeeUSD "15.0"^^xsd:decimal ;
+    :yearInscribed "1938"^^xsd:int ;
+    :isUNESCOListed "false"^^xsd:boolean ;
+    :siteDescription "Sri Lanka's most visited national park, famous for leopards." .
+
+:AdamsPeak rdf:type owl:NamedIndividual , :MountainPeak ;
+    rdfs:label "Adam's Peak" ;
+    :locatedIn :SabaragamuwaProv ;
+    :hasActivity :HikingActivity , :PilgrimageActivity ;
+    :hasEntryFeeUSD "0.0"^^xsd:decimal ;
+    :hasElevationMeters "2243.0"^^xsd:decimal ;
+    :isUNESCOListed "false"^^xsd:boolean ;
+    :siteDescription "Sacred mountain (Sri Pada) revered by multiple religions, climbed at night." .
+
+:MirissaBeach rdf:type owl:NamedIndividual , :Beach ;
+    rdfs:label "Mirissa Beach" ;
+    :locatedIn :SouthernProv ;
+    :hasActivity :SurfingActivity , :SightseeingActivity ;
+    :hasEntryFeeUSD "0.0"^^xsd:decimal ;
+    :isUNESCOListed "false"^^xsd:boolean ;
+    :nearbyTo :GalleFort ;
+    :siteDescription "Popular south-coast beach known for surfing and whale watching." .
+
+:NuwaraEliyaTeaEstate rdf:type owl:NamedIndividual , :TeaPlantation ;
+    rdfs:label "Nuwara Eliya Tea Estate" ;
+    :locatedIn :CentralProv ;
+    :hasActivity :SightseeingActivity ;
+    :hasEntryFeeUSD "5.0"^^xsd:decimal ;
+    :isUNESCOListed "false"^^xsd:boolean ;
+    :hasElevationMeters "1868.0"^^xsd:decimal ;
+    :siteDescription "Highland tea estate and factory in Sri Lanka's Ceylon tea country." .
+
+:DambullaCaveTemple rdf:type owl:NamedIndividual , :CaveTempleSite ;
+    rdfs:label "Dambulla Cave Temple" ;
+    :locatedIn :CentralProv ;
+    :hasActivity :PilgrimageActivity , :SightseeingActivity ;
+    :hasEntryFeeUSD "10.0"^^xsd:decimal ;
+    :yearInscribed "1991"^^xsd:int ;
+    :isUNESCOListed "true"^^xsd:boolean ;
+    :nearbyTo :Sigiriya ;
+    :siteDescription "Cave temple complex with Buddhist murals and statues dating back 2,000 years." .
+
+:PolonnaruwaAncientCity rdf:type owl:NamedIndividual , :AncientCity ;
+    rdfs:label "Polonnaruwa" ;
+    :locatedIn :NorthCentralProv ;
+    :hasActivity :SightseeingActivity , :PhotographyActivity ;
+    :hasEntryFeeUSD "25.0"^^xsd:decimal ;
+    :yearInscribed "1982"^^xsd:int ;
+    :isUNESCOListed "true"^^xsd:boolean ;
+    :nearbyTo :AnuradhapuraAncientCity ;
+    :siteDescription "Ruins of Sri Lanka's second ancient capital." .
+
+:AnuradhapuraAncientCity rdf:type owl:NamedIndividual , :AncientCity ;
+    rdfs:label "Anuradhapura" ;
+    :locatedIn :NorthCentralProv ;
+    :hasActivity :SightseeingActivity , :PilgrimageActivity ;
+    :hasEntryFeeUSD "25.0"^^xsd:decimal ;
+    :yearInscribed "1982"^^xsd:int ;
+    :isUNESCOListed "true"^^xsd:boolean ;
+    :siteDescription "Sri Lanka's first ancient capital, a major Buddhist pilgrimage site." .
+
+:EllaRock rdf:type owl:NamedIndividual , :MountainPeak ;
+    rdfs:label "Ella Rock" ;
+    :locatedIn :UvaProv ;
+    :hasActivity :HikingActivity , :PhotographyActivity ;
+    :hasEntryFeeUSD "0.0"^^xsd:decimal ;
+    :hasElevationMeters "1041.0"^^xsd:decimal ;
+    :isUNESCOListed "false"^^xsd:boolean ;
+    :nearbyTo :RavanaFalls ;
+    :siteDescription "Popular hiking peak in the hill country town of Ella." .
+
+:HortonPlainsNationalPark rdf:type owl:NamedIndividual , :NationalPark ;
+    rdfs:label "Horton Plains National Park" ;
+    :locatedIn :CentralProv ;
+    :hasActivity :HikingActivity , :SafariActivity ;
+    :hasEntryFeeUSD "20.0"^^xsd:decimal ;
+    :isUNESCOListed "true"^^xsd:boolean ;
+    :hasElevationMeters "2100.0"^^xsd:decimal ;
+    :siteDescription "Highland plateau national park, home to World's End cliff." .
+
+:PinnawalaElephantOrphanage rdf:type owl:NamedIndividual , :WildlifeSanctuary ;
+    rdfs:label "Pinnawala Elephant Orphanage" ;
+    :locatedIn :CentralProv ;
+    :hasActivity :SightseeingActivity , :PhotographyActivity ;
+    :hasEntryFeeUSD "12.0"^^xsd:decimal ;
+    :yearInscribed "1975"^^xsd:int ;
+    :isUNESCOListed "false"^^xsd:boolean ;
+    :siteDescription "Sanctuary and orphanage for wild Asian elephants." .
+
+:ColomboNationalMuseum rdf:type owl:NamedIndividual , :Museum ;
+    rdfs:label "Colombo National Museum" ;
+    :locatedIn :WesternProv ;
+    :hasActivity :SightseeingActivity ;
+    :hasEntryFeeUSD "5.0"^^xsd:decimal ;
+    :yearInscribed "1877"^^xsd:int ;
+    :isUNESCOListed "false"^^xsd:boolean ;
+    :siteDescription "Sri Lanka's largest museum, housing royal and historical artefacts." .
+
+:NallurKovil rdf:type owl:NamedIndividual , :HinduKovil ;
+    rdfs:label "Nallur Kovil" ;
+    :locatedIn :NorthernProv ;
+    :hasActivity :PilgrimageActivity ;
+    :hasEntryFeeUSD "0.0"^^xsd:decimal ;
+    :isUNESCOListed "false"^^xsd:boolean ;
+    :siteDescription "Prominent Hindu temple in Jaffna dedicated to Lord Murugan." .
+
+:StAnthonysShrine rdf:type owl:NamedIndividual , :ChristianChurch ;
+    rdfs:label "St. Anthony's Shrine" ;
+    :locatedIn :WesternProv ;
+    :hasActivity :PilgrimageActivity ;
+    :hasEntryFeeUSD "0.0"^^xsd:decimal ;
+    :isUNESCOListed "false"^^xsd:boolean ;
+    :siteDescription "Popular Catholic shrine in Colombo, visited by people of all faiths." .
+
+:JamiUlAlfarMosque rdf:type owl:NamedIndividual , :MosqueSite ;
+    rdfs:label "Jami-Ul-Alfar Mosque" ;
+    :locatedIn :WesternProv ;
+    :hasActivity :SightseeingActivity , :PhotographyActivity ;
+    :hasEntryFeeUSD "0.0"^^xsd:decimal ;
+    :yearInscribed "1909"^^xsd:int ;
+    :isUNESCOListed "false"^^xsd:boolean ;
+    :siteDescription "Iconic red-and-white candy-striped mosque in Colombo Pettah." .
+
+:RavanaFalls rdf:type owl:NamedIndividual , :Waterfall ;
+    rdfs:label "Ravana Falls" ;
+    :locatedIn :UvaProv ;
+    :hasActivity :SightseeingActivity , :PhotographyActivity ;
+    :hasEntryFeeUSD "0.0"^^xsd:decimal ;
+    :isUNESCOListed "false"^^xsd:boolean ;
+    :siteDescription "Wide cascading waterfall near Ella, linked to Ramayana legend." .
+
+:DiyalumaFalls rdf:type owl:NamedIndividual , :Waterfall ;
+    rdfs:label "Diyaluma Falls" ;
+    :locatedIn :UvaProv ;
+    :hasActivity :HikingActivity , :PhotographyActivity ;
+    :hasEntryFeeUSD "0.0"^^xsd:decimal ;
+    :isUNESCOListed "false"^^xsd:boolean ;
+    :siteDescription "Sri Lanka's second-highest waterfall, reached via a hiking trail." .
+
+:BentotaBeach rdf:type owl:NamedIndividual , :Beach ;
+    rdfs:label "Bentota Beach" ;
+    :locatedIn :WesternProv ;
+    :hasActivity :SurfingActivity , :SightseeingActivity ;
+    :hasEntryFeeUSD "0.0"^^xsd:decimal ;
+    :isUNESCOListed "false"^^xsd:boolean ;
+    :siteDescription "Popular beach resort town known for water sports." .
+
+:RoyalBotanicalGardenPeradeniya rdf:type owl:NamedIndividual , :BotanicalGarden ;
+    rdfs:label "Royal Botanical Garden, Peradeniya" ;
+    :locatedIn :CentralProv ;
+    :hasActivity :SightseeingActivity , :PhotographyActivity ;
+    :hasEntryFeeUSD "8.0"^^xsd:decimal ;
+    :yearInscribed "1843"^^xsd:int ;
+    :isUNESCOListed "false"^^xsd:boolean ;
+    :siteDescription "Large botanical garden near Kandy with orchid houses and giant bamboo." .
